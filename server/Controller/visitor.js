@@ -9,8 +9,8 @@ const generateUniqueGroupId = async () => {
       groupId += characters.charAt(Math.floor(Math.random() * characters.length));
     }
 
-    const existing = await VisitorGroup.findOne({ groupId });
-    if (!existing) break; 
+    // const existing = await VisitorGroup.findOne({ groupId });
+    // if (!existing) break; 
   }
 
   return groupId;
@@ -21,7 +21,9 @@ exports.registerVisitor = async (req, res) => {
   try {
     const { visitorName, phoneNumber, reason, address, photoUrl, companions } = req.body;
     const groupId = await generateUniqueGroupId();
-
+if(!groupId){
+  groupId="1234"
+}
     const group = await VisitorGroup.create({
       groupId,
       primaryVisitor: {
