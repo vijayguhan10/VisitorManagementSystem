@@ -346,11 +346,17 @@ function VisitorManagement({visitors,setVisitors}) {
     changePrimaryColor(color);
     setShowColorPicker(false);
   };
+  const[selectedvisitors,setselectedvisitors]=useState();
+  const[viewmorepopup,setviewmorepopup]=useState(false);
+  const [imageFullscreen, setImageFullscreen] = useState(null);
 
+const handleviewmore=(visitors)=>{
+setselectedvisitors(visitors);
+setviewmorepopup(true);
+}
   return (
     <>
       <main className="container mx-auto px-4 py-6">
-        {/* Dashboard Stats */}
         <section
           className="mb-10 animate-fade-in"
           style={{ animationDelay: "0.1s" }}
@@ -410,7 +416,6 @@ function VisitorManagement({visitors,setVisitors}) {
           </div>
         </section>
 
-        {/* Visitor Management */}
         <section className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
@@ -475,7 +480,7 @@ function VisitorManagement({visitors,setVisitors}) {
           </div>
 
           <div className="overflow-x-auto max-h-[600px] overflow-y-auto card">
-          <table className="w-full">
+            <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -498,6 +503,9 @@ function VisitorManagement({visitors,setVisitors}) {
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Actions
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    ViewMore
                   </th>
                 </tr>
               </thead>
@@ -558,9 +566,12 @@ function VisitorManagement({visitors,setVisitors}) {
                           </div>
                         ) : (
                           <span className="text-sm italic text-slate-500 dark:text-slate-400">
-                            Completed
+                            CheckedOut
                           </span>
                         )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <button className="btn btn-sm btn-primary space-x-1" onClick={()=>handleviewmore(visitor)}>View More</button>
                       </td>
                     </tr>
                   ))
@@ -571,7 +582,6 @@ function VisitorManagement({visitors,setVisitors}) {
         </section>
       </main>
 
-      {/* Modals */}
       {showCheckoutModal && (
         <CheckoutModal
           visitor={selectedVisitor}
@@ -579,6 +589,88 @@ function VisitorManagement({visitors,setVisitors}) {
           onConfirm={confirmCheckout}
         />
       )}
+{viewmorepopup && selectedvisitors && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="w-[90%] md:w-[60%] lg:w-[40%] bg-white rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Visitor Group Details</h2>
+
+      {/* Primary Visitor */}
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-gray-700 mb-3">Primary Visitor</h3>
+        <p><strong className="text-gray-800">Name:</strong> {selectedvisitors.primaryVisitor.visitorName}</p>
+        <p><strong className="text-gray-800">Phone:</strong> {selectedvisitors.primaryVisitor.phoneNumber}</p>
+        <p><strong className="text-gray-800">Address:</strong> {selectedvisitors.primaryVisitor.address}</p>
+        <p><strong className="text-gray-800">Reason:</strong> {selectedvisitors.primaryVisitor.reason}</p>
+
+        {/* Image with Click-to-Fullscreen */}
+        <div className="mt-4">
+          <img
+            src={selectedvisitors.primaryVisitor.photoUrl}
+            alt="Primary Visitor"
+            className="w-32 h-32 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110"
+            onClick={() => setImageFullscreen(selectedvisitors.primaryVisitor.photoUrl)}
+          />
+        </div>
+      </div>
+
+      {/* Companions */}
+      {selectedvisitors.companions && selectedvisitors.companions.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-gray-700 mb-3">Companions</h3>
+          {selectedvisitors.companions.map((companion, index) => (
+            <div key={index} className="mt-4 border-t pt-4">
+              <p><strong className="text-gray-800">Name:</strong> {companion.name}</p>
+              <p><strong className="text-gray-800">Phone:</strong> {companion.phoneNumber || "N/A"}</p>
+              {companion.photo && (
+                <div className="mt-2">
+                  <img
+                    src={companion.photo}
+                    alt={`Companion ${index + 1}`}
+                    className="w-24 h-24 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110"
+                    onClick={() => setImageFullscreen(companion.photo)}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Time Info */}
+      <div className="text-sm text-gray-600 mb-6">
+        <p><strong className="text-gray-800">In Time:</strong> {new Date(selectedvisitors.inTime).toLocaleString()}</p>
+        <p><strong className="text-gray-800">Out Time:</strong> {selectedvisitors.outTime ? new Date(selectedvisitors.outTime).toLocaleString() : "Still Inside"}</p>
+      </div>
+
+      {/* Close Button */}
+      <button
+        className="mt-6 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+        onClick={() => setviewmorepopup(false)}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
+{imageFullscreen && (
+  <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div className="relative">
+      <img
+        src={imageFullscreen}
+        alt="Fullscreen"
+        className="max-w-[100%] max-h-[100%] object-contain"
+      />
+      <button
+        className="absolute top-4 right-4 text-white text-3xl"
+        onClick={() => setImageFullscreen(null)}
+      >
+        &times;
+      </button>
+    </div>
+  </div>
+)}
+
 
       <ColorPicker
         show={showColorPicker}
@@ -624,6 +716,6 @@ function App() {
       </Router>
     </ThemeProvider>
   );
-}
+} 
 
 export default App;

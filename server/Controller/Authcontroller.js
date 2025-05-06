@@ -17,15 +17,16 @@ const sendresponse=(userid,res)=>{
   });
 }
 
-exports.registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+exports.registerUser = async (req, res) => { 
+   console.log(req.body);
+  const { name, email, password } = req.body;
 console.log(req.body);
   try {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
     
-    const user = await User.create({ name, email, password, role });
+    const user = await User.create({ name, email, password, role:"admin" });
 
     res.status(201).json({
       _id: user._id,
@@ -35,6 +36,7 @@ console.log(req.body);
       token: sendresponse(user._id,res),
     });
   } catch (err) {
+    console.log(err)
     res.status(500).json({ message: err.message });
   }
 };
