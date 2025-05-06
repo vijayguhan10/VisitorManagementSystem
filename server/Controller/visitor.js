@@ -1,24 +1,50 @@
 const VisitorGroup = require('../Schema/Visitor');
-const { v4: uuidv4 } = require('uuid');
+
+const generateUniqueGroupId = async () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let groupId;
+  while (true) {
+    groupId = '';
+    for (let i = 0; i < 4; i++) {
+      groupId += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    const existing = await VisitorGroup.findOne({ groupId });
+    if (!existing) break; 
+  }
+
+  return groupId;
+};
 
 exports.registerVisitor = async (req, res) => {
+  console.log(req.body);
   try {
-    const { primaryVisitor, companions } = req.body;
-    const groupId = uuidv4();
+    const { visitorName, phoneNumber, reason, address, photoUrl, companions } = req.body;
+    const groupId = await generateUniqueGroupId();
 
     const group = await VisitorGroup.create({
       groupId,
-      primaryVisitor,
+      primaryVisitor: {
+        visitorName,
+        phoneNumber,
+        reason,
+        address,
+        photoUrl,
+      },
       companions,
     });
 
+    console.log("Visitor registered ✅");
+
     res.status(201).json({ message: 'Visitor registered', groupId, group });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 };
 
 exports.markExit = async (req, res) => {
+  console.log(req.body)
   try {
     const { groupId } = req.body;
     const updated = await VisitorGroup.findOneAndUpdate(

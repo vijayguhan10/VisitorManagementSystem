@@ -2,8 +2,9 @@ import { useState, useEffect, createContext, useContext, useRef } from 'react';
 import { FiUsers, FiCheck, FiLogOut, FiUser, FiMoon, FiSun, FiSearch, FiUserCheck, FiUserMinus, FiX, FiAlertCircle } from 'react-icons/fi';
 import { createPortal } from 'react-dom';
 import './index.css';
+import axios from 'axios';
 
-// Theme Context
+
 const ThemeContext = createContext();
 
 function ThemeProvider({ children }) {
@@ -47,7 +48,6 @@ function ThemeProvider({ children }) {
   );
 }
 
-// Header Component
 function Header() {
   const { theme, toggleTheme } = useContext(ThemeContext);
   
@@ -82,7 +82,6 @@ function Header() {
   );
 }
 
-// Footer Component
 function Footer() {
   return (
     <footer className="bg-slate-100 dark:bg-slate-800 py-4 mt-8">
@@ -161,19 +160,19 @@ function CheckoutModal({ visitor, onClose, onConfirm }) {
         <div className="p-6">
           <div className="flex items-center p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg mb-6">
             <img 
-              src={visitor.photo} 
-              alt={`${visitor.name} profile`} 
+              src={visitor.primaryVisitor.photoUrl} 
+              alt={`${visitor.primaryVisitor.visitorName} profile`} 
               className="w-16 h-16 rounded-full object-cover mr-4" 
             />
             <div>
               <h4 className="font-medium text-slate-800 dark:text-slate-200">
-                {visitor.name}
+                {visitor.primaryVisitor.visitorName}
               </h4>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                {visitor.purpose}
+                {visitor.primaryVisitor.reason}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                <span className="font-medium">Check-in time:</span> {visitor.entryTime}
+                <span className="font-medium">Check-in time:</span> {visitor.inTime}
               </p>
             </div>
           </div>
@@ -262,30 +261,35 @@ function ColorPicker({ show, onClose, onColorSelect }) {
 }
 
 // Main App Component
-function VisitorManagement() {
+function VisitorManagement({visitors,setVisitors}) {
   const { primaryColor, changePrimaryColor } = useContext(ThemeContext);
-  const [visitors, setVisitors] = useState([
-    {
-      id: 'IZLSUK',
-      name: 'Vijay Guhan',
-      photo: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-      purpose: 'Meeting with HR',
-      entryTime: '5/6/25, 6:17 PM',
-      status: 'checked-in'
-    }
-  ]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  // const [visitors, setVisitors] = useState([
+  //   {
+  //     id: 'IZLSUK',
+  //     primaryVisitor: {
+  //       visitorName: 'vijay',
+  //       phoneNumber: '6369012255',
+  //       address: 'asdfasdf',
+  //       reason: 'fasdfasdf',
+  //       photoUrl: 'https://res.cloudinary.com/dcwji5ei8/image/upload/v1746540901/bspxwuzszq2aqiszjvqv.jpg'
+  //     },
+  //     entryTime: '5/6/25, 6:17 PM',
+  //     status: 'checked-in'
+  //   }
+  // ]);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [selectedVisitor, setSelectedVisitor] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  
+
   const stats = {
-    totalVisitors: visitors.length,
-    checkedIn: visitors.filter(v => v.status === 'checked-in').length,
-    checkedOut: visitors.filter(v => v.status === 'checked-out').length
+    totalVisitors: visitors?.length,
+    checkedIn: visitors?.filter((v) => v.status === "checked-in").length,
+    checkedOut: visitors?.filter((v) => v.status === "checked-out").length,
   };
-  
+
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -294,17 +298,19 @@ function VisitorManagement() {
     setActiveFilter(filter);
   };
 
-  const filteredVisitors = visitors.filter(visitor => {
-    // Apply search filter
-    const matchesSearch = visitor.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          visitor.purpose.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          visitor.id.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    // Apply status filter
-    const matchesStatus = activeFilter === 'all' || 
-                          (activeFilter === 'checked-in' && visitor.status === 'checked-in') ||
-                          (activeFilter === 'checked-out' && visitor.status === 'checked-out');
-    
+  const filteredVisitors = visitors?.filter((visitor) => {
+    const { visitorName, reason } = visitor.primaryVisitor;
+    console.log(visitorName);
+    const matchesSearch =
+      visitorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      visitor?.id?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      activeFilter === "all" ||
+      (activeFilter === "checked-in" && visitor.inTime && !visitor.outTime) ||
+      (activeFilter === "checked-out" && visitor.outTime);
+
     return matchesSearch && matchesStatus;
   });
 
@@ -313,18 +319,29 @@ function VisitorManagement() {
     setShowCheckoutModal(true);
   };
 
-  const confirmCheckout = () => {
+  const confirmCheckout = async () => {
     if (selectedVisitor) {
-      // Update visitor status
-      const updatedVisitors = visitors.map(visitor => 
-        visitor.id === selectedVisitor.id ? {...visitor, status: 'checked-out'} : visitor
-      );
-      setVisitors(updatedVisitors);
-      setShowCheckoutModal(false);
-      setSelectedVisitor(null);
+      try {
+        const response = await axios.post("http://localhost:5000/api/visitors/exit", {
+          groupId: selectedVisitor.groupId,
+        });
+  
+        const updatedVisitor = response.data.updated;
+  
+        const updatedVisitors = visitors.map((visitor) =>
+          visitor.groupId === updatedVisitor.groupId ? updatedVisitor : visitor
+        );
+  
+        setVisitors(updatedVisitors);
+        setShowCheckoutModal(false);
+        setSelectedVisitor(null);
+      } catch (error) {
+        console.error("Checkout failed", error);
+      }
     }
   };
   
+
   const handleColorSelect = (color) => {
     changePrimaryColor(color);
     setShowColorPicker(false);
@@ -334,11 +351,14 @@ function VisitorManagement() {
     <>
       <main className="container mx-auto px-4 py-6">
         {/* Dashboard Stats */}
-        <section className="mb-10 animate-fade-in" style={{animationDelay: '0.1s'}}>
+        <section
+          className="mb-10 animate-fade-in"
+          style={{ animationDelay: "0.1s" }}
+        >
           <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-6">
             Admin Dashboard
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="card p-6 hover:shadow-lg transition-shadow duration-300">
               <div className="flex items-center">
@@ -355,7 +375,7 @@ function VisitorManagement() {
                 </div>
               </div>
             </div>
-            
+
             <div className="card p-6 hover:shadow-lg transition-shadow duration-300">
               <div className="flex items-center">
                 <div className="h-12 w-12 flex items-center justify-center rounded-full bg-success-100 text-success-600 dark:bg-success-900/30 dark:text-success-400">
@@ -371,7 +391,7 @@ function VisitorManagement() {
                 </div>
               </div>
             </div>
-            
+
             <div className="card p-6 hover:shadow-lg transition-shadow duration-300">
               <div className="flex items-center">
                 <div className="h-12 w-12 flex items-center justify-center rounded-full bg-accent-100 text-accent-600 dark:bg-accent-900/30 dark:text-accent-400">
@@ -389,22 +409,25 @@ function VisitorManagement() {
             </div>
           </div>
         </section>
-        
+
         {/* Visitor Management */}
-        <section className="animate-fade-in" style={{animationDelay: '0.2s'}}>
+        <section className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
               Visitor Management
             </h2>
-            <button 
+            <button
               onClick={() => setShowColorPicker(true)}
               className="btn btn-sm btn-secondary flex items-center space-x-1"
             >
-              <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: primaryColor }}></span>
+              <span
+                className="inline-block w-3 h-3 rounded-full"
+                style={{ backgroundColor: primaryColor }}
+              ></span>
               <span>Theme Color</span>
             </button>
           </div>
-          
+
           <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
             <div className="relative w-full md:w-1/2">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
@@ -416,34 +439,43 @@ function VisitorManagement() {
                 className="input pl-10"
               />
             </div>
-            
+
             <div className="flex space-x-2">
-              <button 
-                className={`btn ${activeFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => handleFilterChange('all')}
+              <button
+                className={`btn ${
+                  activeFilter === "all" ? "btn-primary" : "btn-secondary"
+                }`}
+                onClick={() => handleFilterChange("all")}
               >
                 All
               </button>
-              <button 
-                className={`btn flex items-center space-x-2 ${activeFilter === 'checked-in' ? 'btn-success' : 'btn-secondary'}`}
-                onClick={() => handleFilterChange('checked-in')}
+              <button
+                className={`btn flex items-center space-x-2 ${
+                  activeFilter === "checked-in"
+                    ? "btn-success"
+                    : "btn-secondary"
+                }`}
+                onClick={() => handleFilterChange("checked-in")}
               >
                 <FiUserCheck />
                 <span className="hidden sm:inline">Checked In</span>
               </button>
-              <button 
-                className={`btn flex items-center space-x-2 ${activeFilter === 'checked-out' ? 'btn-danger' : 'btn-secondary'}`}
-                onClick={() => handleFilterChange('checked-out')}
+              <button
+                className={`btn flex items-center space-x-2 ${
+                  activeFilter === "checked-out"
+                    ? "btn-danger"
+                    : "btn-secondary"
+                }`}
+                onClick={() => handleFilterChange("checked-out")}
               >
                 <FiUserMinus />
                 <span className="hidden sm:inline">Checked Out</span>
               </button>
             </div>
           </div>
-          
-          {/* Visitor Table */}
-          <div className="overflow-x-auto card">
-            <table className="w-full">
+
+          <div className="overflow-x-auto max-h-[600px] overflow-y-auto card">
+          <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -470,51 +502,60 @@ function VisitorManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {filteredVisitors.length === 0 ? (
+                {filteredVisitors?.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="px-6 py-10 text-center text-slate-500 dark:text-slate-400 italic">
+                    <td
+                      colSpan="7"
+                      className="px-6 py-10 text-center text-slate-500 dark:text-slate-400 italic"
+                    >
                       No visitors found
                     </td>
                   </tr>
                 ) : (
-                  filteredVisitors.map(visitor => (
-                    <tr 
-                      key={visitor.id} 
+                  filteredVisitors?.map((visitor) => (
+                    <tr
+                      key={visitor.id}
                       className="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500 dark:text-slate-400">
-                        {visitor.id}
+                        {visitor.groupId}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <img 
-                          src={visitor.photo} 
+                        <img
+                          src={visitor.primaryVisitor.photoUrl}
                           alt={`${visitor.name} profile`}
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800 dark:text-slate-200">
-                        {visitor.name}
+                        {visitor.primaryVisitor.visitorName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400 max-w-[200px] truncate">
-                        {visitor.purpose}
+                        {visitor.primaryVisitor.reason}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                        {visitor.entryTime}
+                        {visitor.inTime}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`badge ${visitor.status === 'checked-in' ? 'badge-success' : 'badge-accent'}`}>
-                          {visitor.status === 'checked-in' ? 'Checked In' : 'Checked Out'}
+                        <span
+                          className={`badge ${
+                            !visitor.outTime ? "badge-success" : "badge-accent"
+                          }`}
+                        >
+                          {!visitor.outTime ? "Checked In" : "Checked Out"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        {visitor.status === 'checked-in' ? (
-                          <button
-                            className="btn btn-sm btn-primary flex items-center space-x-1"
-                            onClick={() => handleCheckout(visitor)}
-                          >
-                            <FiLogOut className="text-sm" />
-                            <span>Check Out</span>
-                          </button>
+                        {!visitor.outTime ? (
+                          <div className="inline-block">
+                            <button
+                              className="btn btn-sm btn-primary flex items-center space-x-1"
+                              onClick={() => handleCheckout(visitor)}
+                            >
+                              <FiLogOut className="text-sm" />
+                              <span>Check Out</span>
+                            </button>
+                          </div>
                         ) : (
                           <span className="text-sm italic text-slate-500 dark:text-slate-400">
                             Completed
@@ -529,17 +570,17 @@ function VisitorManagement() {
           </div>
         </section>
       </main>
-      
+
       {/* Modals */}
       {showCheckoutModal && (
-        <CheckoutModal 
+        <CheckoutModal
           visitor={selectedVisitor}
           onClose={() => setShowCheckoutModal(false)}
           onConfirm={confirmCheckout}
         />
       )}
-      
-      <ColorPicker 
+
+      <ColorPicker
         show={showColorPicker}
         onClose={() => setShowColorPicker(false)}
         onColorSelect={handleColorSelect}
@@ -547,15 +588,40 @@ function VisitorManagement() {
     </>
   );
 }
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import Footer from "./components/Footer"; // If needed
 
 function App() {
+  const [visitors, setVisitors] = useState();
+
+  useEffect(() => {
+    const getUserData = async () => {
+      const response = await axios.get("http://localhost:5000/api/visitors");
+      console.log(response);
+      setVisitors(response.data);
+    };
+    getUserData();
+  }, []);
+
   return (
     <ThemeProvider>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <VisitorManagement />
-        <Footer />
-      </div>
+      <Router>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<VisitorManagement visitors={visitors} setVisitors={setVisitors} />} />
+              <Route
+                path="/visitors"
+                element={<VisitorManagement visitors={visitors} />}
+              /> 
+            </Routes>
+          </main>
+
+          {/* <Footer /> */}
+        </div>
+      </Router>
     </ThemeProvider>
   );
 }

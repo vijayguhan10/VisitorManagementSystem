@@ -2,19 +2,24 @@ const mongoose = require('mongoose');
 
 const companionSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  photo: { type: String, required: true },
+  phoneNumber: { type: String, required: false },
+  photo: { type: String, required: false },
 });
 
 const visitorGroupSchema = new mongoose.Schema({
   groupId: { type: String, required: true, unique: true },
   primaryVisitor: {
-    name: { type: String, required: true },
-    mobile: { type: String, required: true },
+    visitorName: { type: String, required: true },
+    phoneNumber: { type: String, required: true },
     address: { type: String, required: true },
-    purpose: { type: String, required: true },
-    photo: { type: String, required: true }, 
+    reason: { type: String, required: true },
+    photoUrl: { type: String, required: true },
   },
-  companions: [companionSchema],
+  companions: {
+    type: [companionSchema],
+    required: false, 
+    default: [],
+  },
   inTime: { type: Date, default: Date.now },
   outTime: { type: Date, default: null },
 });
