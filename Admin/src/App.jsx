@@ -445,16 +445,7 @@ setviewmorepopup(true);
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
               Visitor Management
             </h2>
-            <button
-              onClick={() => setShowColorPicker(true)}
-              className="btn btn-sm btn-secondary flex items-center space-x-1"
-            >
-              <span
-                className="inline-block w-3 h-3 rounded-full"
-                style={{ backgroundColor: primaryColor }}
-              ></span>
-              <span>Theme Color</span>
-            </button>
+      
           </div>
 
           <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
