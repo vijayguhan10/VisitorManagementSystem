@@ -14,7 +14,9 @@ app.use(express.json());
 const cors = require('cors');
 
 app.use(cors({
-  origin: '*',
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true // only if you use cookies or headers that need it
 }));
 
 app.use('/api/visitors', visitorRoutes);
