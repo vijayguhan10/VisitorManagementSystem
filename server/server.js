@@ -11,13 +11,9 @@ connectDB();
 const app = express();
 app.use(express.json());
 
-const cors = require('cors');
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true // only if you use cookies or headers that need it
-}));
+
+app.use(cors({ origin: '*' }));
 
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/auth', authRoutes);
