@@ -28,7 +28,7 @@ function PhoneAuth({ onAuthSuccess }) {
     try {
       localStorage.setItem('otp', generatedOTP);
       localStorage.setItem('otpPhoneNumber', phoneNumber); 
-      await axios.post("http://localhost:5000/api/twilio/sendmessage", {
+      await axios.post(`${import.meta.env.VITE_API_URL}/twilio/sendmessage`, {
         phoneNumber,
         otp: generatedOTP,
       });

@@ -333,7 +333,7 @@ function VisitorManagement({ visitors, setVisitors }) {
     if (selectedVisitor) {
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/visitors/exit",
+          `${import.meta.env.VITE_API_URL}/visitors/exit`,
           {
             groupId: selectedVisitor.groupId,
           }
