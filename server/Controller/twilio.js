@@ -12,8 +12,9 @@ exports.sendmessage=async(req,res)=>{
         const message = await client.messages.create({
             body: `🔐 Secure Code: ${otp}\nUse this OTP to complete your registration.\nNever share this code with anyone.`,
             from: '+19853365328',
-          to: `+${phoneNumber}`
+          to: '+918438434868'
         });
+    
         res.status(200).send(`Message sent successfully. SID: ${message.sid}`);
       } catch (error) {
         console.log(error)
