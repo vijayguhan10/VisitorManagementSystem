@@ -6,6 +6,16 @@ const generateToken = (userId) => {
     expiresIn: '7d',
   });
 };
+const sendresponse=(userid,res)=>{
+  const token = generateToken(userid);
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+}
 
 exports.registerUser = async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -14,7 +24,7 @@ console.log(req.body);
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-    // Create user
+    
     const user = await User.create({ name, email, password, role });
 
     res.status(201).json({
@@ -22,14 +32,13 @@ console.log(req.body);
       name: user.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id),
+      token: sendresponse(user._id,res),
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// @desc    Login user
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
