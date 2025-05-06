@@ -19,7 +19,7 @@ app.use(cors({
     'https://visitor-management-system-admin.vercel.app'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
+
 }));
 
 app.use('/api/visitors', visitorRoutes);
