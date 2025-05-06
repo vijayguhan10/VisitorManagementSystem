@@ -11,7 +11,11 @@ connectDB();
 const app = express();
 app.use(express.json());
 
-app.use(cors());
+const cors = require('cors');
+
+app.use(cors({
+  origin: '*',
+}));
 
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/auth', authRoutes);
