@@ -1,40 +1,53 @@
-import { useState, useEffect, createContext, useContext, useRef } from 'react';
-import { FiUsers, FiCheck, FiLogOut, FiUser, FiMoon, FiSun, FiSearch, FiUserCheck, FiUserMinus, FiX, FiAlertCircle } from 'react-icons/fi';
-import { createPortal } from 'react-dom';
-import './index.css';
-import axios from 'axios';
-
-
+import { useState, useEffect, createContext, useContext, useRef } from "react";
+import {
+  FiUsers,
+  FiCheck,
+  FiLogOut,
+  FiUser,
+  FiMoon,
+  FiSun,
+  FiSearch,
+  FiUserCheck,
+  FiUserMinus,
+  FiX,
+  FiAlertCircle,
+} from "react-icons/fi";
+import { createPortal } from "react-dom";
+import "./index.css";
+import axios from "axios";
+import LoginSignup from "./LoginSignup";
 const ThemeContext = createContext();
 
 function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('visittrack-theme');
-    if (savedTheme === 'dark') return 'dark';
-    if (savedTheme === 'light') return 'light';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const savedTheme = localStorage.getItem("visittrack-theme");
+    if (savedTheme === "dark") return "dark";
+    if (savedTheme === "light") return "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   });
-  
+
   const [primaryColor, setPrimaryColor] = useState(() => {
-    return localStorage.getItem('visittrack-primary-color') || '#3b82f6';
+    return localStorage.getItem("visittrack-primary-color") || "#3b82f6";
   });
 
   useEffect(() => {
-    localStorage.setItem('visittrack-theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+    localStorage.setItem("visittrack-theme", theme);
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [theme]);
 
   useEffect(() => {
-    localStorage.setItem('visittrack-primary-color', primaryColor);
-    document.documentElement.style.setProperty('--color-primary', primaryColor);
+    localStorage.setItem("visittrack-primary-color", primaryColor);
+    document.documentElement.style.setProperty("--color-primary", primaryColor);
   }, [primaryColor]);
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   const changePrimaryColor = (color) => {
@@ -42,7 +55,9 @@ function ThemeProvider({ children }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, primaryColor, changePrimaryColor }}>
+    <ThemeContext.Provider
+      value={{ theme, toggleTheme, primaryColor, changePrimaryColor }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -50,7 +65,7 @@ function ThemeProvider({ children }) {
 
 function Header() {
   const { theme, toggleTheme } = useContext(ThemeContext);
-  
+
   return (
     <header className="sticky top-0 z-50 bg-primary-600 text-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -58,20 +73,20 @@ function Header() {
           <FiUser className="text-2xl" />
           <h1 className="text-xl font-bold hidden sm:block">VisitTrack</h1>
         </div>
-        
+
         <div className="flex items-center space-x-4">
-          <button 
+          <button
             onClick={toggleTheme}
             className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
             aria-label="Toggle theme"
           >
-            {theme === 'light' ? <FiMoon /> : <FiSun />}
+            {theme === "light" ? <FiMoon /> : <FiSun />}
           </button>
-          
+
           <div className="hidden md:block px-3 py-1 bg-white/10 rounded-md">
             <span className="text-sm">saravana (admin)</span>
           </div>
-          
+
           <button className="flex items-center space-x-2 px-3 py-1 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
             <FiLogOut />
             <span className="hidden sm:inline">Logout</span>
@@ -90,15 +105,24 @@ function Footer() {
           <p className="text-slate-600 dark:text-slate-400 text-sm">
             © 2025 VisitTrack. All rights reserved.
           </p>
-          
+
           <div className="flex space-x-4 mt-2 md:mt-0">
-            <a href="#" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
+            <a
+              href="#"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+            >
               Privacy Policy
             </a>
-            <a href="#" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
+            <a
+              href="#"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+            >
               Terms of Service
             </a>
-            <a href="#" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
+            <a
+              href="#"
+              className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+            >
               Contact
             </a>
           </div>
@@ -111,23 +135,23 @@ function Footer() {
 // Checkout Modal Component
 function CheckoutModal({ visitor, onClose, onConfirm }) {
   const modalRef = useRef(null);
-  
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
-    
-    document.addEventListener('keydown', handleKeyDown);
-    document.body.classList.add('overflow-hidden'); // Prevent background scrolling
-    
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.classList.add("overflow-hidden"); // Prevent background scrolling
+
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.classList.remove('overflow-hidden'); // Re-enable scrolling
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.classList.remove("overflow-hidden"); // Re-enable scrolling
     };
   }, [onClose]);
-  
+
   const handleBackdropClick = (e) => {
     if (modalRef.current && !modalRef.current.contains(e.target)) {
       onClose();
@@ -137,11 +161,11 @@ function CheckoutModal({ visitor, onClose, onConfirm }) {
   if (!visitor) return null;
 
   const modal = (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[1000] animate-fade-in"
       onClick={handleBackdropClick}
     >
-      <div 
+      <div
         className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-xl overflow-hidden animate-slide-up"
         ref={modalRef}
       >
@@ -149,20 +173,20 @@ function CheckoutModal({ visitor, onClose, onConfirm }) {
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
             Visitor Checkout
           </h3>
-          <button 
+          <button
             className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             onClick={onClose}
           >
             <FiX className="text-slate-500" />
           </button>
         </div>
-        
+
         <div className="p-6">
           <div className="flex items-center p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg mb-6">
-            <img 
-              src={visitor.primaryVisitor.photoUrl} 
-              alt={`${visitor.primaryVisitor.visitorName} profile`} 
-              className="w-16 h-16 rounded-full object-cover mr-4" 
+            <img
+              src={visitor.primaryVisitor.photoUrl}
+              alt={`${visitor.primaryVisitor.visitorName} profile`}
+              className="w-16 h-16 rounded-full object-cover mr-4"
             />
             <div>
               <h4 className="font-medium text-slate-800 dark:text-slate-200">
@@ -172,25 +196,23 @@ function CheckoutModal({ visitor, onClose, onConfirm }) {
                 {visitor.primaryVisitor.reason}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                <span className="font-medium">Check-in time:</span> {visitor.inTime}
+                <span className="font-medium">Check-in time:</span>{" "}
+                {visitor.inTime}
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center p-4 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 rounded-lg">
             <FiAlertCircle className="mr-3 text-xl flex-shrink-0" />
             <p>Are you sure you want to check out this visitor?</p>
           </div>
         </div>
-        
+
         <div className="flex justify-end space-x-3 p-4 bg-slate-50 dark:bg-slate-700/30">
-          <button 
-            className="btn btn-secondary"
-            onClick={onClose}
-          >
+          <button className="btn btn-secondary" onClick={onClose}>
             Cancel
           </button>
-          <button 
+          <button
             className="btn btn-primary flex items-center space-x-1"
             onClick={onConfirm}
           >
@@ -201,22 +223,22 @@ function CheckoutModal({ visitor, onClose, onConfirm }) {
       </div>
     </div>
   );
-  
+
   return createPortal(modal, document.body);
 }
 
 // Color Picker Component
 function ColorPicker({ show, onClose, onColorSelect }) {
   const colors = [
-    { name: 'Blue', value: '#3b82f6' },    // primary-500
-    { name: 'Purple', value: '#8b5cf6' },  // accent-500
-    { name: 'Green', value: '#10b981' },   // success-500
-    { name: 'Red', value: '#ef4444' },     // error-500
-    { name: 'Amber', value: '#f59e0b' },   // warning-500
-    { name: 'Indigo', value: '#6366f1' },
-    { name: 'Rose', value: '#f43f5e' },
-    { name: 'Emerald', value: '#10b981' },
-    { name: 'Cyan', value: '#06b6d4' },
+    { name: "Blue", value: "#3b82f6" }, // primary-500
+    { name: "Purple", value: "#8b5cf6" }, // accent-500
+    { name: "Green", value: "#10b981" }, // success-500
+    { name: "Red", value: "#ef4444" }, // error-500
+    { name: "Amber", value: "#f59e0b" }, // warning-500
+    { name: "Indigo", value: "#6366f1" },
+    { name: "Rose", value: "#f43f5e" },
+    { name: "Emerald", value: "#10b981" },
+    { name: "Cyan", value: "#06b6d4" },
   ];
 
   if (!show) return null;
@@ -228,17 +250,17 @@ function ColorPicker({ show, onClose, onColorSelect }) {
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
             Choose Primary Color
           </h3>
-          <button 
+          <button
             className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             onClick={onClose}
           >
             <FiX className="text-slate-500" />
           </button>
         </div>
-        
+
         <div className="p-6">
           <div className="grid grid-cols-3 gap-4">
-            {colors.map(color => (
+            {colors.map((color) => (
               <button
                 key={color.value}
                 className="flex flex-col items-center p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
@@ -261,7 +283,7 @@ function ColorPicker({ show, onClose, onColorSelect }) {
 }
 
 // Main App Component
-function VisitorManagement({visitors,setVisitors}) {
+function VisitorManagement({ visitors, setVisitors }) {
   const { primaryColor, changePrimaryColor } = useContext(ThemeContext);
   // const [visitors, setVisitors] = useState([
   //   {
@@ -322,16 +344,19 @@ function VisitorManagement({visitors,setVisitors}) {
   const confirmCheckout = async () => {
     if (selectedVisitor) {
       try {
-        const response = await axios.post("http://localhost:5000/api/visitors/exit", {
-          groupId: selectedVisitor.groupId,
-        });
-  
+        const response = await axios.post(
+          "http://localhost:5000/api/visitors/exit",
+          {
+            groupId: selectedVisitor.groupId,
+          }
+        );
+
         const updatedVisitor = response.data.updated;
-  
+
         const updatedVisitors = visitors.map((visitor) =>
           visitor.groupId === updatedVisitor.groupId ? updatedVisitor : visitor
         );
-  
+
         setVisitors(updatedVisitors);
         setShowCheckoutModal(false);
         setSelectedVisitor(null);
@@ -340,7 +365,6 @@ function VisitorManagement({visitors,setVisitors}) {
       }
     }
   };
-  
 
   const handleColorSelect = (color) => {
     changePrimaryColor(color);
@@ -475,7 +499,7 @@ function VisitorManagement({visitors,setVisitors}) {
           </div>
 
           <div className="overflow-x-auto max-h-[600px] overflow-y-auto card">
-          <table className="w-full">
+            <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -588,16 +612,14 @@ function VisitorManagement({visitors,setVisitors}) {
     </>
   );
 }
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route,useLocation } from "react-router-dom";
 // import Footer from "./components/Footer"; // If needed
-
 function App() {
   const [visitors, setVisitors] = useState();
 
   useEffect(() => {
     const getUserData = async () => {
-      const response = await axios.get("http://localhost:5000/api/visitors");
-      console.log(response);
+      const response = await axios.get(`http://10.57.1.132:5000/api/visitors`);
       setVisitors(response.data);
     };
     getUserData();
@@ -606,23 +628,30 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen flex flex-col">
-          <Header />
-
-          <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<VisitorManagement visitors={visitors} setVisitors={setVisitors} />} />
-              <Route
-                path="/visitors"
-                element={<VisitorManagement visitors={visitors} />}
-              /> 
-            </Routes>
-          </main>
-
-          {/* <Footer /> */}
-        </div>
+        <AppContent visitors={visitors} setVisitors={setVisitors} />
       </Router>
     </ThemeProvider>
+  );
+}
+
+function AppContent({ visitors, setVisitors }) {
+  const location = useLocation();
+  const hideHeader = location.pathname === "/";
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {!hideHeader && <Header />}
+
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<LoginSignup />} />
+          <Route
+            path="/visitors"
+            element={<VisitorManagement visitors={visitors} setVisitors={setVisitors} />}
+          />
+        </Routes>
+      </main>
+    </div>
   );
 }
 
