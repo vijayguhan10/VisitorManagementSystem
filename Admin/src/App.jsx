@@ -65,7 +65,8 @@ function ThemeProvider({ children }) {
 
 function Header() {
   const { theme, toggleTheme } = useContext(ThemeContext);
-
+  const name=localStorage.getItem("name");
+  const email=localStorage.getItem("email");
   return (
     <header className="sticky top-0 z-50 bg-primary-600 text-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -84,7 +85,7 @@ function Header() {
           </button>
 
           <div className="hidden md:block px-3 py-1 bg-white/10 rounded-md">
-            <span className="text-sm">saravana (admin)</span>
+            <span className="text-sm">{name}</span>
           </div>
 
           <button className="flex items-center space-x-2 px-3 py-1 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
@@ -285,20 +286,7 @@ function ColorPicker({ show, onClose, onColorSelect }) {
 // Main App Component
 function VisitorManagement({ visitors, setVisitors }) {
   const { primaryColor, changePrimaryColor } = useContext(ThemeContext);
-  // const [visitors, setVisitors] = useState([
-  //   {
-  //     id: 'IZLSUK',
-  //     primaryVisitor: {
-  //       visitorName: 'vijay',
-  //       phoneNumber: '6369012255',
-  //       address: 'asdfasdf',
-  //       reason: 'fasdfasdf',
-  //       photoUrl: 'https://res.cloudinary.com/dcwji5ei8/image/upload/v1746540901/bspxwuzszq2aqiszjvqv.jpg'
-  //     },
-  //     entryTime: '5/6/25, 6:17 PM',
-  //     status: 'checked-in'
-  //   }
-  // ]);
+  
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
@@ -308,8 +296,8 @@ function VisitorManagement({ visitors, setVisitors }) {
 
   const stats = {
     totalVisitors: visitors?.length,
-    checkedIn: visitors?.filter((v) => v.status === "checked-in").length,
-    checkedOut: visitors?.filter((v) => v.status === "checked-out").length,
+    checkedIn: visitors?.filter((v) => !v.outTime).length,
+    checkedOut: visitors?.filter((v) => v.outTime).length,
   };
 
   const handleSearch = (e) => {
@@ -720,6 +708,7 @@ function App() {
 function AppContent({ visitors, setVisitors }) {
   const location = useLocation();
   const hideHeader = location.pathname === "/";
+
 
   return (
     <div className="min-h-screen flex flex-col">
