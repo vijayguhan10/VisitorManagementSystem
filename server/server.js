@@ -13,14 +13,7 @@ app.use(express.json());
 
 
 
-app.use(cors({
-  origin: [
-    'https://visitor-management-system-visitor.vercel.app',
-    'https://visitor-management-system-admin.vercel.app'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-
-}));
+app.use(cors({ origin: "*" }));
 
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/auth', authRoutes);
