@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import FormField from './FormField'
-
+import axios from 'axios'
 function PhoneAuth({ onAuthSuccess }) {
   const [step, setStep] = useState('phone') // 'phone' or 'otp'
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -16,51 +16,60 @@ function PhoneAuth({ onAuthSuccess }) {
   
   const handleSendOTP = async () => {
     if (!validatePhoneNumber(phoneNumber)) {
-      setError('Please enter a valid 10-digit phone number')
-      return
+      setError('Please enter a valid 10-digit phone number');
+      return;
     }
-    
-    setIsLoading(true)
-    setError('')
-    
+  
+    setIsLoading(true);
+    setError('');
+  
+    const generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+  
     try {
-      // Simulate OTP sending
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // For demo purposes, we'll use a fixed OTP: 123456
-      setStep('otp')
+      localStorage.setItem('otp', generatedOTP);
+      localStorage.setItem('otpPhoneNumber', phoneNumber); 
+      await axios.post("http://localhost:5000/api/twilio/sendmessage", {
+        phoneNumber,
+        otp: generatedOTP,
+      });
+  
+      setStep('otp');
     } catch (err) {
-      setError('Failed to send OTP. Please try again.')
+      console.error(err);
+      setError('Failed to send OTP. Please try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+  
   
   const handleVerifyOTP = async () => {
     if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP')
-      return
+      setError('Please enter a valid 6-digit OTP');
+      return;
     }
-    
-    setIsLoading(true)
-    setError('')
-    
+  
+    setIsLoading(true);
+    setError('');
+  
     try {
-      // Simulate OTP verification
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // For demo purposes, we'll accept OTP: 123456
-      if (otp === '123456') {
-        onAuthSuccess(phoneNumber)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+  
+      // Get OTP from localStorage
+      const storedOTP = localStorage.getItem('otp');
+  
+      if (otp === storedOTP) {
+        onAuthSuccess(phoneNumber);
       } else {
-        setError('Invalid OTP. Please try again.')
+        setError('Invalid OTP. Please try again.');
       }
     } catch (err) {
-      setError('Failed to verify OTP. Please try again.')
+      setError('Failed to verify OTP. Please try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+  
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
@@ -169,9 +178,9 @@ function PhoneAuth({ onAuthSuccess }) {
           </div>
         )}
         
-        <p className="text-xs text-neutral-500 text-center mt-6">
+        {/* <p className="text-xs text-neutral-500 text-center mt-6">
           For demo purposes, use OTP: 123456
-        </p>
+        </p> */}
       </motion.div>
     </div>
   )
