@@ -1,18 +1,11 @@
 const VisitorGroup = require('../Schema/Visitor');
 
-const generateUniqueGroupId = async () => {
+const generateGroupId = () => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let groupId;
-  while (true) {
-    groupId = '';
-    for (let i = 0; i < 4; i++) {
-      groupId += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-
-    // const existing = await VisitorGroup.findOne({ groupId });
-    // if (!existing) break; 
+  let groupId = '';
+  for (let i = 0; i < 4; i++) {
+    groupId += characters.charAt(Math.floor(Math.random() * characters.length));
   }
-
   return groupId;
 };
 
@@ -20,10 +13,8 @@ exports.registerVisitor = async (req, res) => {
   console.log(req.body);
   try {
     const { visitorName, phoneNumber, reason, address, photoUrl, companions } = req.body;
-    const groupId = await generateUniqueGroupId();
-if(!groupId){
-  groupId="1234"
-}
+    const groupId = generateGroupId();
+ 
     const group = await VisitorGroup.create({
       groupId,
       primaryVisitor: {
