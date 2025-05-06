@@ -690,7 +690,7 @@ function App() {
 
   useEffect(() => {
     const getUserData = async () => {
-      const response = await axios.get(`http://10.57.1.132:5000/api/visitors`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/visitors`);
       setVisitors(response.data);
     };
     getUserData();
