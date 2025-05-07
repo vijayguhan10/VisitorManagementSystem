@@ -6,21 +6,14 @@ function Footer() {
           <p className="text-sm text-neutral-500">
             © {new Date().getFullYear()} Visitor Management System
           </p>
-          <div className="flex items-center space-x-4">
-            <a href="#privacy" className="text-sm text-neutral-500 hover:text-primary-600 transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#terms" className="text-sm text-neutral-500 hover:text-primary-600 transition-colors">
-              Terms of Service
-            </a>
-            <a href="#help" className="text-sm text-neutral-500 hover:text-primary-600 transition-colors">
-              Help Center
-            </a>
-          </div>
+          {/* Developed By Section */}
+          <p className="text-sm text-neutral-500">
+            Developed by <span className="font-semibold">CSE Department</span> - <span className="font-semibold">Vijay Guhan, Sabari</span>
+          </p>
         </div>
       </div>
     </footer>
   )
 }
 
-export default Footer
+export default Footer;

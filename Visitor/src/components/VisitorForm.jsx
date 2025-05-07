@@ -222,7 +222,7 @@ function VisitorForm({ onSubmitSuccess }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 md:p-6 lg:p-8">
+    <div className="bg-[#ffffffa7] rounded-xl shadow-sm border border-neutral-200 p-4 md:p-6 lg:p-8">
       <h2 className="text-xl md:text-2xl font-semibold text-neutral-800 mb-6">
         Visitor Registration
       </h2>
