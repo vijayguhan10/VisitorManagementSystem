@@ -83,8 +83,9 @@ function Header() {
     <header className="sticky top-0 z-50 bg-primary-600 text-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <FiUser className="text-2xl" />
-          <h1 className="text-xl font-bold hidden sm:block">VisitTrack</h1>
+        <img src="https://media.licdn.com/dms/image/v2/D560BAQHkowMZXDkHiw/company-logo_200_200/company-logo_200_200/0/1695805992962/srieshwar_logo?e=2147483647&v=beta&t=tFUWpXbizNyk25fM2My-1lDW1jOJHnK5JX35posinNg" alt="VisitTrack Logo" className="h-8 w-8 sm:h-10 sm:w-10" />
+<h1 className="text-xl font-bold hidden sm:block">VisitTrack</h1>
+
         </div>
 
         <div className="flex items-center space-x-4">
@@ -305,22 +306,40 @@ function VisitorManagement({ visitors, setVisitors }) {
   
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState("today");
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [selectedVisitor, setSelectedVisitor] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
-  const stats = {
-    totalVisitors: visitors?.length,
-    checkedIn: visitors?.filter((v) => !v.outTime).length,
-    checkedOut: visitors?.filter((v) => v.outTime).length,
+  const today = new Date();
+  const isToday = (date) => {
+    const d = new Date(date);
+    return (
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear()
+    );
   };
+  
+  const stats = {
+    totalVisitors: visitors?.length || 0,
+    checkedIn: visitors?.filter((v) => !v.outTime).length || 0,
+    checkedOut: visitors?.filter((v) => v.outTime).length || 0,
+    todayVisitors: visitors?.filter((v) => isToday(v.inTime)).length || 0,
+    todayCheckedIn: visitors?.filter((v) => isToday(v.inTime) && !v.outTime).length || 0,
+    todayCheckedOut: visitors?.filter((v) => isToday(v.outTime)).length || 0,
+  };
+  
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
 
   const handleFilterChange = (filter) => {
+    if(activeFilter==="all" && filter==="all"){
+      setActiveFilter("today");
+      return
+    }
     setActiveFilter(filter);
   };
 
@@ -335,7 +354,9 @@ function VisitorManagement({ visitors, setVisitors }) {
     const matchesStatus =
       activeFilter === "all" ||
       (activeFilter === "checked-in" && visitor.inTime && !visitor.outTime) ||
-      (activeFilter === "checked-out" && visitor.outTime);
+      (activeFilter === "checked-out" && visitor.outTime)||
+      (activeFilter === "today" && visitor.inTime && isToday(visitor.inTime));
+
 
     return matchesSearch && matchesStatus;
   });
@@ -392,55 +413,74 @@ setviewmorepopup(true);
           <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-6">
             Admin Dashboard
           </h2>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="card p-6 hover:shadow-lg transition-shadow duration-300">
-              <div className="flex items-center">
-                <div className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
-                  <FiUsers className="text-2xl" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Total Visitors
+            {/* Card Component */}
+            {[
+              {
+                title: "Total Visitors",
+                icon: <FiUsers className="text-2xl" />,
+                bg: "bg-primary-100",
+                text: "text-primary-600",
+                darkBg: "dark:bg-primary-900/30",
+                darkText: "dark:text-primary-400",
+                today: stats.todayVisitors,
+                overall: stats.totalVisitors,
+              },
+              {
+                title: "Checked In",
+                icon: <FiCheck className="text-2xl" />,
+                bg: "bg-success-100",
+                text: "text-success-600",
+                darkBg: "dark:bg-success-900/30",
+                darkText: "dark:text-success-400",
+                today: stats.todayCheckedIn,
+                overall: stats.checkedIn,
+              },
+              {
+                title: "Checked Out",
+                icon: <FiLogOut className="text-2xl" />,
+                bg: "bg-accent-100",
+                text: "text-accent-600",
+                darkBg: "dark:bg-accent-900/30",
+                darkText: "dark:text-accent-400",
+                today: stats.todayCheckedOut,
+                overall: stats.checkedOut,
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="card p-6 rounded-2xl bg-white dark:bg-slate-800 shadow-md hover:shadow-xl transition-all duration-300"
+              >
+                <div className="flex items-center mb-6">
+                  <div
+                    className={`h-12 w-12 flex items-center justify-center rounded-full ${item.bg} ${item.text} ${item.darkBg} ${item.darkText}`}
+                  >
+                    {item.icon}
+                  </div>
+                  <h3 className="ml-4 text-xl font-semibold text-slate-800 dark:text-slate-200">
+                    {item.title}
                   </h3>
-                  <p className="text-3xl font-semibold text-slate-800 dark:text-slate-200">
-                    {stats.totalVisitors}
-                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-6 text-center">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Today
+                    </p>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                      {item.today}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Overall
+                    </p>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                      {item.overall}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="card p-6 hover:shadow-lg transition-shadow duration-300">
-              <div className="flex items-center">
-                <div className="h-12 w-12 flex items-center justify-center rounded-full bg-success-100 text-success-600 dark:bg-success-900/30 dark:text-success-400">
-                  <FiCheck className="text-2xl" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Currently Checked In
-                  </h3>
-                  <p className="text-3xl font-semibold text-slate-800 dark:text-slate-200">
-                    {stats.checkedIn}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="card p-6 hover:shadow-lg transition-shadow duration-300">
-              <div className="flex items-center">
-                <div className="h-12 w-12 flex items-center justify-center rounded-full bg-accent-100 text-accent-600 dark:bg-accent-900/30 dark:text-accent-400">
-                  <FiLogOut className="text-2xl" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Checked Out
-                  </h3>
-                  <p className="text-3xl font-semibold text-slate-800 dark:text-slate-200">
-                    {stats.checkedOut}
-                  </p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
@@ -449,7 +489,6 @@ setviewmorepopup(true);
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
               Visitor Management
             </h2>
-      
           </div>
 
           <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
@@ -590,7 +629,12 @@ setviewmorepopup(true);
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <button className="btn btn-sm btn-primary space-x-1" onClick={()=>handleviewmore(visitor)}>View More</button>
+                        <button
+                          className="btn btn-sm btn-primary space-x-1"
+                          onClick={() => handleviewmore(visitor)}
+                        >
+                          View More
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -608,88 +652,122 @@ setviewmorepopup(true);
           onConfirm={confirmCheckout}
         />
       )}
-{viewmorepopup && selectedvisitors && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="w-[90%] md:w-[60%] lg:w-[40%] bg-white rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Visitor Group Details</h2>
+      {viewmorepopup && selectedvisitors && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="w-[90%] md:w-[60%] lg:w-[40%] bg-white rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              Visitor Group Details
+            </h2>
 
-      {/* Primary Visitor */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-700 mb-3">Primary Visitor</h3>
-        <p><strong className="text-gray-800">Name:</strong> {selectedvisitors.primaryVisitor.visitorName}</p>
-        <p><strong className="text-gray-800">Phone:</strong> {selectedvisitors.primaryVisitor.phoneNumber}</p>
-        <p><strong className="text-gray-800">Address:</strong> {selectedvisitors.primaryVisitor.address}</p>
-        <p><strong className="text-gray-800">Reason:</strong> {selectedvisitors.primaryVisitor.reason}</p>
+            {/* Primary Visitor */}
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                Primary Visitor
+              </h3>
+              <p>
+                <strong className="text-gray-800">Name:</strong>{" "}
+                {selectedvisitors.primaryVisitor.visitorName}
+              </p>
+              <p>
+                <strong className="text-gray-800">Phone:</strong>{" "}
+                {selectedvisitors.primaryVisitor.phoneNumber}
+              </p>
+              <p>
+                <strong className="text-gray-800">Address:</strong>{" "}
+                {selectedvisitors.primaryVisitor.address}
+              </p>
+              <p>
+                <strong className="text-gray-800">Reason:</strong>{" "}
+                {selectedvisitors.primaryVisitor.reason}
+              </p>
 
-        {/* Image with Click-to-Fullscreen */}
-        <div className="mt-4">
-          <img
-            src={selectedvisitors.primaryVisitor.photoUrl}
-            alt="Primary Visitor"
-            className="w-32 h-32 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110"
-            onClick={() => setImageFullscreen(selectedvisitors.primaryVisitor.photoUrl)}
-          />
-        </div>
-      </div>
+              {/* Image with Click-to-Fullscreen */}
+              <div className="mt-4">
+                <img
+                  src={selectedvisitors.primaryVisitor.photoUrl}
+                  alt="Primary Visitor"
+                  className="w-32 h-32 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110"
+                  onClick={() =>
+                    setImageFullscreen(selectedvisitors.primaryVisitor.photoUrl)
+                  }
+                />
+              </div>
+            </div>
 
-      {/* Companions */}
-      {selectedvisitors.companions && selectedvisitors.companions.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold text-gray-700 mb-3">Companions</h3>
-          {selectedvisitors.companions.map((companion, index) => (
-            <div key={index} className="mt-4 border-t pt-4">
-              <p><strong className="text-gray-800">Name:</strong> {companion.name}</p>
-              <p><strong className="text-gray-800">Phone:</strong> {companion.phoneNumber || "N/A"}</p>
-              {companion.photo && (
-                <div className="mt-2">
-                  <img
-                    src={companion.photo}
-                    alt={`Companion ${index + 1}`}
-                    className="w-24 h-24 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110"
-                    onClick={() => setImageFullscreen(companion.photo)}
-                  />
+            {/* Companions */}
+            {selectedvisitors.companions &&
+              selectedvisitors.companions.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-gray-700 mb-3">
+                    Companions
+                  </h3>
+                  {selectedvisitors.companions.map((companion, index) => (
+                    <div key={index} className="mt-4 border-t pt-4">
+                      <p>
+                        <strong className="text-gray-800">Name:</strong>{" "}
+                        {companion.name}
+                      </p>
+                      <p>
+                        <strong className="text-gray-800">Phone:</strong>{" "}
+                        {companion.phoneNumber || "N/A"}
+                      </p>
+                      {companion.photo && (
+                        <div className="mt-2">
+                          <img
+                            src={companion.photo}
+                            alt={`Companion ${index + 1}`}
+                            className="w-24 h-24 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110"
+                            onClick={() => setImageFullscreen(companion.photo)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
+
+            {/* Time Info */}
+            <div className="text-sm text-gray-600 mb-6">
+              <p>
+                <strong className="text-gray-800">In Time:</strong>{" "}
+                {new Date(selectedvisitors.inTime).toLocaleString()}
+              </p>
+              <p>
+                <strong className="text-gray-800">Out Time:</strong>{" "}
+                {selectedvisitors.outTime
+                  ? new Date(selectedvisitors.outTime).toLocaleString()
+                  : "Still Inside"}
+              </p>
             </div>
-          ))}
+
+            {/* Close Button */}
+            <button
+              className="mt-6 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              onClick={() => setviewmorepopup(false)}
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Time Info */}
-      <div className="text-sm text-gray-600 mb-6">
-        <p><strong className="text-gray-800">In Time:</strong> {new Date(selectedvisitors.inTime).toLocaleString()}</p>
-        <p><strong className="text-gray-800">Out Time:</strong> {selectedvisitors.outTime ? new Date(selectedvisitors.outTime).toLocaleString() : "Still Inside"}</p>
-      </div>
-
-      {/* Close Button */}
-      <button
-        className="mt-6 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-        onClick={() => setviewmorepopup(false)}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
-
-{imageFullscreen && (
-  <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-    <div className="relative">
-      <img
-        src={imageFullscreen}
-        alt="Fullscreen"
-        className="max-w-[100%] max-h-[100%] object-contain"
-      />
-      <button
-        className="absolute top-4 right-4 text-white text-3xl"
-        onClick={() => setImageFullscreen(null)}
-      >
-        &times;
-      </button>
-    </div>
-  </div>
-)}
-
+      {imageFullscreen && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="relative">
+            <img
+              src={imageFullscreen}
+              alt="Fullscreen"
+              className="max-w-[100%] max-h-[100%] object-contain"
+            />
+            <button
+              className="absolute top-4 right-4 text-white text-3xl"
+              onClick={() => setImageFullscreen(null)}
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
 
       <ColorPicker
         show={showColorPicker}
