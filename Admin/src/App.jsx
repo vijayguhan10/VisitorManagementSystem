@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 import "./index.css";
 import axios from "axios";
 import LoginSignup from "./LoginSignup";
+import { jwtDecode } from "jwt-decode";
 const ThemeContext = createContext();
 
 function ThemeProvider({ children }) {
@@ -349,7 +350,7 @@ function VisitorManagement({ visitors, setVisitors }) {
     const matchesSearch =
       visitorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      visitor?.id?.toLowerCase().includes(searchQuery.toLowerCase());
+      visitor?.groupId?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
       activeFilter === "all" ||
@@ -777,7 +778,12 @@ setviewmorepopup(true);
     </>
   );
 }
-import { BrowserRouter as Router, Routes, Route,useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 // import Footer from "./components/Footer"; // If needed
 function App() {
   const [visitors, setVisitors] = useState();
@@ -801,6 +807,7 @@ function App() {
 
 function AppContent({ visitors, setVisitors }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const hideHeader = location.pathname === "/";
 
 
@@ -813,12 +820,16 @@ function AppContent({ visitors, setVisitors }) {
           <Route path="/" element={<LoginSignup />} />
           <Route
             path="/visitors"
-            element={<VisitorManagement visitors={visitors} setVisitors={setVisitors} />}
+            element={
+              <VisitorManagement
+                visitors={visitors}
+                setVisitors={setVisitors}
+              />
+            }
           />
         </Routes>
       </main>
     </div>
   );
 }
-
 export default App;

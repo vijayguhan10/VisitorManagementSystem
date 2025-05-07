@@ -26,7 +26,7 @@ function FormField({ label, name, type, placeholder, value, onChange, error, req
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className={`block w-full px-4 py-3 rounded-lg transition-all duration-200 
+          className={`block w-full px-4 bg-[#ffffffa7]  py-3 rounded-lg transition-all duration-200 
             ${focused ? 'ring-2 ring-primary-300 border-primary-400' : 'border-neutral-300'} 
             ${error ? 'border-error-300 bg-error-50' : 'border'}
             focus:outline-none`}

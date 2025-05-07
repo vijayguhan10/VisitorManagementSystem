@@ -53,6 +53,7 @@ localStorage.setItem("name",response.data.name);
 localStorage.setItem("email",response.data.email);
         localStorage.setItem("event_token", response.data.token);
         toast.success("Login successful!");
+        
         navigate("/visitors");
       }
     } catch (error) {
