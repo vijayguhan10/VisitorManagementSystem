@@ -50,6 +50,7 @@ function LoginSignup() {
 
         localStorage.setItem("event_token", response.data.token);
         toast.success("Login successful!");
+        
         navigate("/visitors");
       }
     } catch (error) {

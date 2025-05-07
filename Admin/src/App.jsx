@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 import "./index.css";
 import axios from "axios";
 import LoginSignup from "./LoginSignup";
+import { jwtDecode } from "jwt-decode";
 const ThemeContext = createContext();
 
 function ThemeProvider({ children }) {
@@ -326,7 +327,7 @@ function VisitorManagement({ visitors, setVisitors }) {
     const matchesSearch =
       visitorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      visitor?.id?.toLowerCase().includes(searchQuery.toLowerCase());
+      visitor?.groupId?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
       activeFilter === "all" ||
@@ -345,7 +346,7 @@ function VisitorManagement({ visitors, setVisitors }) {
     if (selectedVisitor) {
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/visitors/exit",
+          `${import.meta.env.VITE_API_URL}/visitors/exit`,
           {
             groupId: selectedVisitor.groupId,
           }
@@ -612,14 +613,19 @@ function VisitorManagement({ visitors, setVisitors }) {
     </>
   );
 }
-import { BrowserRouter as Router, Routes, Route,useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 // import Footer from "./components/Footer"; // If needed
 function App() {
   const [visitors, setVisitors] = useState();
 
   useEffect(() => {
     const getUserData = async () => {
-      const response = await axios.get(`http://10.57.1.132:5000/api/visitors`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/visitors`);
       setVisitors(response.data);
     };
     getUserData();
@@ -633,10 +639,40 @@ function App() {
     </ThemeProvider>
   );
 }
-
 function AppContent({ visitors, setVisitors }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const hideHeader = location.pathname === "/";
+
+  useEffect(() => {
+    const token = localStorage.getItem("event_token");
+
+    if (token) {
+      try {
+        const decoded = jwt_decode(token);
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        if (decoded.exp < currentTime) {
+          // Token expired
+          localStorage.removeItem("event_token");
+          navigate("/");
+        } else {
+          if (location.pathname === "/") {
+            navigate("/visitors");
+          }
+        }
+      } catch (error) {
+        console.error("Invalid token", error);
+        localStorage.removeItem("event_token");
+        navigate("/");
+      }
+    } else {
+      // No token
+      if (location.pathname !== "/") {
+        navigate("/");
+      }
+    }
+  }, [location.pathname, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -647,12 +683,16 @@ function AppContent({ visitors, setVisitors }) {
           <Route path="/" element={<LoginSignup />} />
           <Route
             path="/visitors"
-            element={<VisitorManagement visitors={visitors} setVisitors={setVisitors} />}
+            element={
+              <VisitorManagement
+                visitors={visitors}
+                setVisitors={setVisitors}
+              />
+            }
           />
         </Routes>
       </main>
     </div>
   );
 }
-
 export default App;
