@@ -16,7 +16,9 @@ app.use(express.json());
 app.use(cors({
   origin: [
     'https://visitor-management-system-visitor.vercel.app',
-    'https://visitor-management-system-admin.vercel.app'
+    'https://visitor-management-system-admin.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:5174'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 

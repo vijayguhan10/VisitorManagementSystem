@@ -15,10 +15,10 @@ function PhoneAuth({ onAuthSuccess }) {
   }
   
   const handleSendOTP = async () => {
-    if (!validatePhoneNumber(phoneNumber)) {
-      setError('Please enter a valid 10-digit phone number');
-      return;
-    }
+    // if (!validatePhoneNumber(phoneNumber)) {
+    //   setError('Please enter a valid 10-digit phone number');
+    //   return;
+    // }
   
     setIsLoading(true);
     setError('');
@@ -29,7 +29,7 @@ function PhoneAuth({ onAuthSuccess }) {
       localStorage.setItem('otp', generatedOTP);
       localStorage.setItem('otpPhoneNumber', phoneNumber); 
       await axios.post(`${import.meta.env.VITE_API_URL}/twilio/sendmessage`, {
-        phoneNumber,
+        email:phoneNumber,
         otp: generatedOTP,
       });
   
@@ -82,8 +82,8 @@ function PhoneAuth({ onAuthSuccess }) {
           <h1 className="text-2xl font-semibold text-neutral-800">Welcome</h1>
           <p className="text-neutral-600 mt-2">
             {step === 'phone' 
-              ? 'Please enter your phone number to continue'
-              : 'Enter the OTP sent to your phone'
+              ? 'Please enter your Mail to continue'
+              : 'Enter the OTP sent to your Mail'
             }
           </p>
         </div>
@@ -101,10 +101,10 @@ function PhoneAuth({ onAuthSuccess }) {
         {step === 'phone' ? (
           <div className="space-y-4">
             <FormField
-              label="Phone Number"
-              name="phoneNumber"
+              label="Email"
+              name="Email"
               type="tel"
-              placeholder="Enter your 10-digit phone number"
+              placeholder="Enter your Email"
               value={phoneNumber}
               onChange={(e) => {
                 setPhoneNumber(e.target.value)
