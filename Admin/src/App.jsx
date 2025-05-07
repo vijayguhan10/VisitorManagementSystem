@@ -63,10 +63,22 @@ function ThemeProvider({ children }) {
   );
 }
 
+import { useNavigate } from "react-router-dom";
+
 function Header() {
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const name=localStorage.getItem("name");
-  const email=localStorage.getItem("email");
+  const name = localStorage.getItem("name");
+  const email = localStorage.getItem("email");
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Remove user data from localStorage
+    localStorage.removeItem("name");
+    localStorage.removeItem("email");
+    // Navigate to the home page
+    navigate("/");
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-primary-600 text-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -88,7 +100,10 @@ function Header() {
             <span className="text-sm">{name}</span>
           </div>
 
-          <button className="flex items-center space-x-2 px-3 py-1 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-2 px-3 py-1 rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+          >
             <FiLogOut />
             <span className="hidden sm:inline">Logout</span>
           </button>
@@ -97,6 +112,7 @@ function Header() {
     </header>
   );
 }
+
 
 function Footer() {
   return (
