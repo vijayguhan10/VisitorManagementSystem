@@ -8,7 +8,7 @@ function Footer() {
           </p>
           {/* Developed By Section */}
           <p className="text-sm text-neutral-500">
-            Developed by <span className="font-semibold">CSE Department</span> - <span className="font-semibold">Vijay Guhan, Sabari</span>
+            Developed by <span className="font-semibold">ACS</span> - <span className="font-semibold">Autom consultancy servieces</span>
           </p>
         </div>
       </div>
