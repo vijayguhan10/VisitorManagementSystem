@@ -1,7 +1,7 @@
 const twilio = require('twilio');
 
-const accountSid = 'ACb1ebee1db4d3107bb6fcfddcf2dbddf4';
-const authToken = 'ed1c441a5423d9404132cf7c7be1f220';
+const accountSid = 'ACf8ce98cd49578deb2063d0be5931f505';
+const authToken = 'e55b8e8869f752294d743bfdeb3f90da';
 
 const client = twilio(accountSid, authToken);
 
@@ -11,8 +11,8 @@ exports.sendmessage=async(req,res)=>{
     try {
         const message = await client.messages.create({
             body: `🔐 Secure Code: ${otp}\nUse this OTP to complete your registration.\nNever share this code with anyone.`,
-            from: '+19853365328',
-          to: '+918438434868'
+            from: '+18624292969',
+          to: '+918220563218'
         });
     
         res.status(200).send(`Message sent successfully. SID: ${message.sid}`);
