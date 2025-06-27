@@ -2,10 +2,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import FormField from "./FormField";
 import axios from "axios";
+
 function PhoneAuth({ onAuthSuccess }) {
   const [step, setStep] = useState("phone"); // 'phone' or 'otp'
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,10 +56,10 @@ function PhoneAuth({ onAuthSuccess }) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Get OTP from localStorage
       const storedOTP = localStorage.getItem("otp");
 
-      if (otp === storedOTP) {
+      // Allow static test OTP '1234' to always succeed
+      if (otp === storedOTP || otp === "1234") {
         onAuthSuccess(phoneNumber);
       } else {
         setError("Invalid OTP. Please try again.");
@@ -78,7 +79,6 @@ function PhoneAuth({ onAuthSuccess }) {
           "url('https://content.jdmagicbox.com/comp/coimbatore/dc/0422px422.x422.1222333407s5v2f5.dc/catalogue/sri-eshwar-college-of-engineering-vadasithur-coimbatore-engineering-colleges-1u4da43.jpg')",
       }}
     >
-      {/* <div className="absolute inset-0  z-0"></div>{" "} */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -123,11 +123,11 @@ function PhoneAuth({ onAuthSuccess }) {
               onClick={handleSendOTP}
               disabled={isLoading}
               className={`w-full py-3 z-100 px-4 rounded-lg font-medium transition-colors duration-200 
-    ${
-      isLoading
-        ? "bg-primary-100 text-primary-400 cursor-not-allowed"
-        : "bg-primary-500 text-white hover:bg-primary-600"
-    }`}
+                ${
+                  isLoading
+                    ? "bg-primary-100 text-primary-400 cursor-not-allowed"
+                    : "bg-primary-500 text-white hover:bg-primary-600"
+                }`}
             >
               {isLoading ? "Sending OTP..." : "Send OTP"}
             </button>
@@ -186,9 +186,9 @@ function PhoneAuth({ onAuthSuccess }) {
           </div>
         )}
 
-        {/* <p className="text-xs text-neutral-500 text-center mt-6">
-          For demo purposes, use OTP: 123456
-        </p> */}
+        <p className="text-xs text-neutral-500 text-center mt-6">
+          For demo purposes, you can use OTP: 1234
+        </p>
       </motion.div>
     </div>
   );
