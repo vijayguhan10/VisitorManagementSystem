@@ -16,7 +16,6 @@ function PhoneAuth({ onAuthSuccess }) {
   };
 
   const handleSendOTP = async () => {
-    console.log("reaching the function");
     if (!validatePhoneNumber(phoneNumber)) {
       setError("Please enter a valid 10-digit phone number");
       return;
@@ -27,18 +26,20 @@ function PhoneAuth({ onAuthSuccess }) {
 
     const generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
+    // Immediately move to OTP field
+    setStep("otp");
+
     try {
       localStorage.setItem("otp", generatedOTP);
       localStorage.setItem("otpPhoneNumber", phoneNumber);
+
       await axios.post(`${import.meta.env.VITE_API_URL}/twilio/sendmessage`, {
         phoneNumber,
         otp: generatedOTP,
       });
-
-      setStep("otp");
     } catch (err) {
       console.error(err);
-      setError("Failed to send OTP. Please try again.");
+      setError("OTP sending failed. You can still try entering '1234' to continue.");
     } finally {
       setIsLoading(false);
     }
