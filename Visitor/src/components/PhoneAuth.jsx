@@ -6,7 +6,7 @@ import axios from "axios";
 function PhoneAuth({ onAuthSuccess }) {
   const [step, setStep] = useState("phone"); // 'phone' or 'otp'
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [otp, setOtp] = useState();
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,15 +39,15 @@ function PhoneAuth({ onAuthSuccess }) {
       });
     } catch (err) {
       console.error(err);
-      setError("OTP sending failed. You can still try entering '1234' to continue.");
+      setError("OTP sending failed. You can still try entering '1234' or '123456' to continue.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
-      setError("Please enter a valid 6-digit OTP");
+    if (!otp || otp.length < 4) {
+      setError("Please enter a valid OTP");
       return;
     }
 
@@ -59,8 +59,8 @@ function PhoneAuth({ onAuthSuccess }) {
 
       const storedOTP = localStorage.getItem("otp");
 
-      // Allow static test OTP '1234' to always succeed
-      if (otp === storedOTP || otp === "1234") {
+      // Allow static test OTPs '1234' and '123456' to always succeed
+      if (otp === storedOTP || otp === "1234" || otp === "123456") {
         onAuthSuccess(phoneNumber);
       } else {
         setError("Invalid OTP. Please try again.");
@@ -123,7 +123,7 @@ function PhoneAuth({ onAuthSuccess }) {
               type="button"
               onClick={handleSendOTP}
               disabled={isLoading}
-              className={`w-full py-3 z-100 px-4 rounded-lg font-medium transition-colors duration-200 
+              className={`w-full py-3 px-4 rounded-lg font-medium transition-colors duration-200 
                 ${
                   isLoading
                     ? "bg-primary-100 text-primary-400 cursor-not-allowed"
@@ -188,7 +188,7 @@ function PhoneAuth({ onAuthSuccess }) {
         )}
 
         <p className="text-xs text-neutral-500 text-center mt-6">
-          For demo purposes, you can use OTP: 1234
+          For demo purposes, you can use OTP: <strong>1234</strong> or <strong>123456</strong>
         </p>
       </motion.div>
     </div>
